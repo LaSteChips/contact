@@ -1,5 +1,8 @@
 import sys
 import sqlite3
+import re
+format_tel = "[0][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]"
+format_email = "^[\w\.]+@([\w-]+\.)+[\w-]{2,9}$"
 conn = sqlite3.connect('contact')
 cur = conn.cursor()
 
@@ -17,7 +20,16 @@ def list():
         sql = '''Select * from Contact'''
         result = cur.execute(sql)
         result = cur.fetchall()
-        print(result)
+        print("Il y a ", len(result), "contacts")
+        for row in result:
+            print("\n")
+            print("nom", row[0])
+            print("prénom", row[1])
+            print("surnom", row[2])
+            print("téléphone", row[3])
+            print("mail", row[4])
+            print("adresse", row[5])
+            print("\n")
         conn.commit()
     except sqlite3.Error as error:
         print("Petit soucis !", error)
@@ -38,33 +50,43 @@ def man():
     print("En tapant 5, tu pourras rayer un des contacts que tu a enregistrer de la surface du globe, tout simplement ._.")
     print("En tapant 6, tu pourras modifier la donnée que tu a renseigner sur un contact au cas tu a fais une petite boulette")
     print('\n')
+    print("il y a aussi les option de recherche qui s'effectue comme ceci : ")
+    print("")
+    print("elle sert a se renseigner")
     print("et voila bg, tu a toutes les infos requis pour pouvoir utiliser ma base de données tanquillement ;)")
     
 
 def search(zone, rechercher):
     try:
         if zone == "Nom":
-            select = '''Select * from Contact WHERE Nom = ?'''
-        if zone == "Prenom":
-            select = '''Select * from Contact WHERE Prenom = ?'''
+            select = "Select * from Contact WHERE Nom LIKE ?"
+        if zone == "Prénom":
+            select = "Select * from Contact WHERE Prenom LIKE ?"
         if zone == "Téléphone":
-            select = '''Select * from Contact WHERE Téléphone = ?'''
+            select = "Select * from Contact WHERE Téléphone LIKE ?"
         if zone == "Surnom":
-            select = '''Select * from Contact WHERE Surnom = ?'''
+            select = "Select * from Contact WHERE Surnom LIKE ?"
         if zone == "Email":
-            select = '''Select * from Contact WHERE Email = ?'''
+            select = "Select * from Contact WHERE Email LIKE ?"
         if zone == "Adresse":
-            select = '''Select * from Contact WHERE Adresse = ?'''
-        utile = (rechercher, )
+            select = "Select * from Contact WHERE Adresse LIKE ?"
+        utile = ('%'+rechercher+'%', )
         result = cur.execute(select, utile)
         result = cur.fetchall()
-        print(result)
+        for row in result:
+            print("\n")
+            print("nom", row[0])
+            print("prénom", row[1])
+            print("surnom", row[2])
+            print("téléphone", row[3])
+            print("mail", row[4])
+            print("adresse", row[5])
+            print("\n")
         conn.commit()
     except sqlite3.Error as error:
-        print("Petit soucis !", error)
+        print("il y a une saucisse dans le potage °-°", error)
 
-
-def intéract():
+def interact():
     choix = None
     print("bonsoir et bienvenue dans le help jeune padawan :D")
     print("voici toutes les commandes que tu peux utiliser sur cette base de donnée ;)")
@@ -80,26 +102,38 @@ def intéract():
             Nom= input('Quel est son nom ? : ')
             Prenom= input('Quel est son prénom ? : ')
             Surnom= input('Quel est son surnom ? : ')
-            Telephone= input('Quel est son numéro de téléphone ? : ')
-            Email = input('Quel est son Email ? : ')
+            Telephone= input('Quel est son numéro de téléphone ? (veuillez respecter le format "0x-xx-xx-xx-xx"): ')
+            Email = input('Quel est son Email ? (veuillez respecter le format "XXX.XXX@XXX.XXX"): ')
             Adresse= input("Quel est son adresse ? : ")
             Insert_into(Nom,Prenom,Surnom,Telephone,Email,Adresse)
+            try: 
+                Telephone_test = re.match(format_tel, Telephone)
+                while Telephone_test == None:
+                    print("Désolé mais y a une norme mon mon frero -_-' , regarde c'est cette norme la :D  : 0x-xx-xx-xx-xx (il faut aussi ajouter les tiret)")
+                    Telephone = input('Recommence avec la norme :) : ')
+                    Telephone_test = re.match(format_tel, Telephone)
+            except:
+                print("")
+            try: 
+                Email_test = re.match(format_email, Email)
+                while Email_test == None:
+                    print("Désolé mais y a une norme mon mon frero -_-' , regarde c'est cette norme la :D  : XXX.XXX@XXX.XXX")
+                    Email = input('Recommence avec la norme :) : ')
+                    Email_test = re.match(format_email, Email)
+            except:
+                print("")
             print("Ajouter avec succès bro")
-            print("\n")
             print("\n")      
         if choix == "2":    
             list()   
-            print("\n")
             print("\n")
         if choix == "3":
             zone = input("Sur quel zone spécifique (Nom/Prenom/Surnom/Téléphone/Email/Adresse) recherche-tu ? : ")
             rechercher = input("Quel donnée recherche tu ? ? ")
             search(zone, rechercher) 
             print("\n")
-            print("\n")
         if choix =="4":
             man()
-            print("\n")
             print("\n")
         if choix =="5":
             Nom= input('Quel est le nom de votre contact que tu veux supprimer ?: ')
@@ -111,7 +145,6 @@ def intéract():
             supprimer(Nom,Prenom,Surnom,Telephone,Email,Adresse)
             print("Suppression réussie mon gars !")
             print("\n")
-            print("\n")
         if choix =="6":
             Loca_update = input("Quel est la colonne a modifier (Nom/Prenom/Surnom/Téléphone/Email/Adresse): ")
             New_data = input("Quel est la nouvelle donnée : ")
@@ -122,7 +155,6 @@ def intéract():
             Email= input('Quel est l Email de votre contact a mettre a jour : ')
             Adresse= input("Quel est l'adresse de votre contact a mettre a jour : ")
             maj(Loca_update, New_data, Nom, Prenom, Surnom, Telephone, Email, Adresse)
-            print("\n")
             print("\n")
 
 def supprimer(Nom, Prenom, Surnom, Telephone, Email, Adresse):
@@ -221,4 +253,4 @@ for arg in sys.argv:
                     print ("ou alors n'hésite pas de consulter la commande help :)")
             break
     except:
-            intéract()
+            interact()
