@@ -218,6 +218,7 @@ for arg in sys.argv:
             supprimer(Nom,Prenom,Surnom,Telephone,Email,Adresse)
             print("Félicitation !")
             print("tu viens de rayer ce contact de la réalité B)")
+            print("(j'espère que tu n'a pas honte quand même :|")
             break
             
         if sys.argv[1] == "update":
